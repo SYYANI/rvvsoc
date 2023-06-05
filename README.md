@@ -1,6 +1,8 @@
-# rvvsoc
+# RVVSoC
 
 Here is a RISC-V Vector Instruction Set SoC implemented using Chisel3.
+
+## Testing the SoC
 
 ### Did it work?
 
@@ -20,3 +22,7 @@ You should see a whole bunch of output that ends with something like the followi
 If you see the above then...
 
 ### It worked!
+
+## License
+
+RVSoC is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
