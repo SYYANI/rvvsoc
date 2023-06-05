@@ -4,11 +4,12 @@ import chisel3._
 import chisel3.util._
 import rvvsoc.core._
 import rvvsoc.sysbus._
-
-class MMURequest extends Bundle { 
-// MMURequest is undirected because we need it as a Chisel type later
+import rvvsoc.utils.{Debug, Error}
+class MMURequest extends Bundle { // MMURequest is undirected because we need it as a Chisel type later
     val addr = UInt(32.W)
     val data_wr = UInt(32.W)
+    val vec_data_wr = UInt(128.W)
+    val vec_en = Bool()
     val sel = UInt(4.W)
     val wen = Bool()
     val ren = Bool()
@@ -16,6 +17,7 @@ class MMURequest extends Bundle {
 }
 
 class MMUResponse extends Bundle {
+    val vec_data_rd = Output(UInt(128.W))
     val data_rd = Output(UInt(32.W))
     val locked = Output(Bool())
     val err = Output(Bool())
@@ -42,7 +44,7 @@ class MMUWrapperIO extends Bundle {
     val req = Input(new MMURequest)
     val res = new MMUResponse
     val csr_info = new CSRInfo
-    val expt = new MMUException 
+    val expt = new MMUException
     val bus_request = Flipped(new SysBusSlaveBundle)
 }
 
@@ -60,12 +62,12 @@ class MMUWrapper extends Module {
     val paddr_reg_pagefault = RegInit(Bool(), false.B)
 
     val page_fault = ptw.io.expt.iPF | ptw.io.expt.lPF | ptw.io.expt.sPF
-    
+
     req_reg := Mux(page_fault, 0.U.asTypeOf(new MMURequest()),
-        Mux(prev_cache_hit || !locked_for_next_req, io.req, req_reg)) 
+        Mux(prev_cache_hit || !locked_for_next_req, io.req, req_reg))
 
     locked_for_next_req := Mux(page_fault, false.B, Mux(prev_cache_hit || !locked_for_next_req, io.req.wen || io.req.ren, true.B))
-    
+
     // phase 1. vaddr -> paddr, 1 cycle if tlb hit, more cycles if tlb miss
     // phase 2. paddr -> data, 0 cycle if cache hit, 1 cycle if cache miss
 
@@ -84,13 +86,16 @@ class MMUWrapper extends Module {
 
     val expt = Reg(new MMUException())
     expt := ptw.io.expt
-    
+
     io.expt := expt
 
+    io.bus_request.vec_en_i := req_reg.vec_en
+    io.bus_request.vec_data_i := req_reg.vec_data_wr
     io.bus_request.adr_i := Mux(tlb.io.valid, tlb.io.paddr, ptw.io.mem.addr)
+    //    Error("io.bus_request.adr_i: %x\n",ptw.io.mem.addr)
     io.bus_request.dat_i := Mux(tlb.io.valid, req_reg.data_wr, ptw.io.mem.addr)
     io.bus_request.sel_i := Mux(tlb.io.valid, req_reg.sel, "b1111".U(4.W))
-    io.bus_request.stb_i := Mux(page_fault, false.B, Mux(tlb.io.valid, locked_for_next_req, ptw.io.mem.request)) 
+    io.bus_request.stb_i := Mux(page_fault, false.B, Mux(tlb.io.valid, locked_for_next_req, ptw.io.mem.request))
     io.bus_request.cyc_i := true.B
     io.bus_request.we_i := Mux(tlb.io.valid, req_reg.wen, false.B) // ptw never writes
 
@@ -99,6 +104,9 @@ class MMUWrapper extends Module {
     ptw.io.mem.data := Mux(ptw.io.mem.request && !prev_cache_hit, io.bus_request.dat_o, 0.U(32.W))
     ptw.io.mem.valid := Mux(ptw.io.mem.request, (io.bus_request.ack_o), false.B)
 
+    io.res.vec_data_rd := io.bus_request.vec_data_o
+
+    //    Debug("mmu_io.res.vec_data_rd: %x\n",io.res.vec_data_rd)
     io.res.data_rd := Mux(prev_cache_hit, io.bus_request.dat_o, 0.U(32.W))
     io.res.locked := !prev_cache_hit && locked_for_next_req && !paddr_reg_pagefault
     io.res.err :=  Mux(prev_cache_hit, io.bus_request.err_o, false.B)
