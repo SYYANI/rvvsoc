@@ -21,6 +21,17 @@ If you see the above then...
 
 ### It worked!
 
+## Structure
+
+The project is organized as follows:
+
+<img src="http://flopsyyan-typora.oss-cn-beijing.aliyuncs.com/img/overlook.png" alt="overlook" style="zoom:50%;" />
+
+And the SoC structure:
+
+<img src="http://flopsyyan-typora.oss-cn-beijing.aliyuncs.com/img/socoverlook.png" alt="socoverlook" style="zoom:50%;" />
+
+
 ## License
 
-RVSoC is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
+RVVSoC is under the [BSD-2-Clause license](https://github.com/SYYANI/rvvsoc/blob/main/LICENSE). See the [LICENSE](./LICENSE) file for details.
