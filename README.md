@@ -2,8 +2,6 @@
 
 Here is a RISC-V Vector Instruction Set SoC implemented using Chisel3.
 
-## Testing the SoC
-
 ### Did it work?
 
 You should now have a working Chisel3 project.
