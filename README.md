@@ -25,11 +25,11 @@ If you see the above then...
 
 The project is organized as follows:
 
-<img src="http://flopsyyan-typora.oss-cn-beijing.aliyuncs.com/img/overlook.png" alt="overlook" style="zoom:50%;" />
+![image-20230605233107755](http://flopsyyan-typora.oss-cn-beijing.aliyuncs.com/img/image-20230605233107755.png)
 
 And the SoC structure:
 
-<img src="http://flopsyyan-typora.oss-cn-beijing.aliyuncs.com/img/socoverlook.png" alt="socoverlook" style="zoom:50%;" />
+![image-20230605233120551](http://flopsyyan-typora.oss-cn-beijing.aliyuncs.com/img/image-20230605233120551.png)
 
 
 ## License
