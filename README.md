@@ -1,7 +1,5 @@
 # rvvsoc
 
-=======================
-
 Here is a RISC-V Vector Set SoC implemented using Chisel3.
 
 ### Did it work?
